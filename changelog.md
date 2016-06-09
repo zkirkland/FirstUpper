@@ -1,3 +1,6 @@
+##### Version 0.03.00 -- 06.09.2016
+Refactor code with new [Notepad++ .NET template](https://github.com/kbilsted/NotepadPlusPlusPluginPack.Net/releases, "Notepad++ .NET template") from Kasper Graversen.
+
 #####Version 0.02 -- 06.06.2016
 Improvements to how the code handles the text.
 
