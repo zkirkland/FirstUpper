@@ -1,3 +1,8 @@
+##### Version 0.03.01 -- 06.10.2016
+New options in menu.
+* New option to "Capitalize All Markdown Titles" in a document.
+* Option "Capitalize Selected Title" now corrects any erroneous capitalization automatically.
+
 ##### Version 0.03.00 -- 06.09.2016
 Refactor code with new [Notepad++ .NET template](https://github.com/kbilsted/NotepadPlusPlusPluginPack.Net/releases, "Notepad++ .NET template") from Kasper Graversen.
 
