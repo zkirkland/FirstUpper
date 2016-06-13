@@ -1,3 +1,9 @@
+##### Version 0.03.02 -- 06.13.2016
+Bug fix. Add different build.
+* Fix issue #3 where "Capitalize First Word of All Sentences" was removing the last character each time it was called.
+* Add .NET 2.0 x86 build for older systems.
+* Work on new method "CamelCase Last Word" where user can use keyboard shortcut to camel case the last word typed. Uses a "Directed Acyclic Word Graph" to search for actual words (English only) and Camel Case based on that graph.
+
 ##### Version 0.03.01 -- 06.10.2016
 New options in menu.
 * New option to "Capitalize All Markdown Titles" in a document.
