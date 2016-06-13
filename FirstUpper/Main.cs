@@ -8,10 +8,11 @@ using System.Windows.Forms;
 using Kbg.NppPluginNET.PluginInfrastructure;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+//using DawgSharp; // For the "Directed Acyclic Word Graph" for the Camel Case method.
 
 namespace Kbg.NppPluginNET
 {
-    class Main
+    static class Main
     {
         static string version = "FirstUpper Notepad++ Plugin\nVersion 0.03.01\nCopyright Zach Kirkland\nzkirkland514@gmail.com\nAll Rights Reserved";
         internal const string PluginName = "FirstUpper";
@@ -116,7 +117,7 @@ namespace Kbg.NppPluginNET
                                 // Replace the correct char in the selected text with its uppercase letter.
                                 charArraySelText.SetValue(firstLetter, firstLetterIndex);
                                 // Clear the word to make ready for the next one.
-                                word.Clear();
+                                Clear(word);
                                 // Reset first letter and first word indicators.
                                 firstLetterIndex = -1;
                                 firstWord = false;
@@ -125,7 +126,7 @@ namespace Kbg.NppPluginNET
                             else
                             {
                                 // Clear the word to make ready for the next one.
-                                word.Clear();
+                                Clear(word);
                                 // Reset first letter indicator.
                                 firstLetterIndex = -1;
                             }
@@ -199,7 +200,7 @@ namespace Kbg.NppPluginNET
                 // Get the length of the document.
                 int length = scintillaGateway.GetLength();
                 // Get the text in the document.
-                string allText = scintillaGateway.GetText(length);
+                string allText = scintillaGateway.GetText(length + 1);
 
                 // Convert the text to char array for easy manipulation.
                 char[] charArrayAllText = allText.ToCharArray();
@@ -304,6 +305,59 @@ namespace Kbg.NppPluginNET
             // should not be capitalized.
             Regex rg = new Regex(@"[a-zA-Z0-9]+");
             return rg.IsMatch(strToCheck);
+        }
+
+        /// <summary>
+        /// Turn the last word typed into camel case.
+        /// Uses "Directed Acyclic Word Graph" or "DAWG" for short.
+        /// </summary>
+        //internal static void camelCaseLastWord()
+        //{
+        //    // Get scintilla gateway.
+        //    IntPtr currentScint = PluginBase.GetCurrentScintilla();
+        //    ScintillaGateway scintillaGateway = new ScintillaGateway(currentScint);
+
+        //    using (FileStream fs = File.Open("FirstUpperDAWG.bin", FileMode.Open, FileAccess.Read))
+        //    {
+        //        var dawg = Dawg<bool>.Load(fs);
+        //        StringBuilder word = new StringBuilder();
+
+        //        Position curPos = scintillaGateway.GetCurrentPos();
+        //        char charAtCursor = new char();
+
+        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) == ' ')
+        //        {
+        //            curPos = new Position(curPos.Value - 1);
+        //        }
+
+        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) != ' ')
+        //        {
+        //            curPos = new Position(curPos.Value - 1);
+        //        }
+
+        //        if (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) == ' ')
+        //        {
+        //            curPos = new Position(curPos.Value + 1);
+        //        }
+
+        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) != ' ')
+        //        {
+        //            word.Append(Convert.ToChar(scintillaGateway.GetCharAt(curPos)));
+        //            curPos = new Position(curPos.Value - 1);
+        //        }
+        //    }
+        //}
+
+        /// <summary>
+        /// Since we are using .net 2.0, need a "clear" capability for
+        /// string builder objects.
+        /// </summary>
+        /// <param name="value"></param>
+        internal static void Clear(StringBuilder value)
+        {
+            value.Length = 0;
+            value.Capacity = 1;
+            value.Capacity = 16;
         }
         #endregion
     }
