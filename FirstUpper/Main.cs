@@ -14,7 +14,7 @@ namespace Kbg.NppPluginNET
 {
     static class Main
     {
-        static string version = "FirstUpper Notepad++ Plugin\nVersion 0.03.01\nCopyright Zach Kirkland\nzkirkland514@gmail.com\nAll Rights Reserved";
+        static string version = "FirstUpper Notepad++ Plugin\nVersion 0.03.02\nCopyright Zach Kirkland\nzkirkland514@gmail.com\nAll Rights Reserved";
         internal const string PluginName = "FirstUpper";
         static string iniFilePath = null;
         static bool someSetting = false;
