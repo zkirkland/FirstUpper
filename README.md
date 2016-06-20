@@ -6,7 +6,7 @@ This is a basic plugin for Notepad++ that will convert the first letter of highl
 
 ### Features
 ##### Capitalize the First Letter of Every Word in a Selection
-Select some text and press ```Ctrl+Alt+U``` to capitalize the first letter of the words in the selection. This is meant for proper capitalization of titles based on the Chicaco Manual of Style and specific words will not be capitalized. The plugin uses the text file "FirstUpperForbiddenWords.txt" as the list of words that should not be capitalized.
+Select some text and press ```Ctrl+Alt+U``` to capitalize the first letter of the words in the selection. This is meant for proper capitalization of titles based on the Chicago Manual of Style and specific words will not be capitalized. The plugin uses the text file "FirstUpperForbiddenWords.txt" as the list of words that should not be capitalized.
 
 ##### Capitalize the First Letter of the First Word of All Sentences in the Document
 This does not have a keyboard shortcut and must be accessed from the Plugins menu. This feature will look for typical punctuation that you use to end a sentence such as periods or question marks and it will capitalize the first letter of the first word directly after that punctuation.
