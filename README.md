@@ -2,7 +2,7 @@
 Notepad++ plugin to capitalize the first letter of a word or words in selected text.
 
 ### Summary
-This is a basic plugin for Notepad++ that will convert the first letter of highlighted words to uppercase.
+This is a basic plugin for Notepad++ that gives the user different tools for capitalization.
 
 ### Features
 ##### Capitalize the First Letter of Every Word in a Selection
