@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Kbg.NppPluginNET.PluginInfrastructure;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-//using DawgSharp; // For the "Directed Acyclic Word Graph" for the Camel Case method.
+using DawgSharp;
 
 namespace Kbg.NppPluginNET
 {
     static class Main
     {
-        static string version = "FirstUpper Notepad++ Plugin\nVersion 0.03.02\nCopyright Zach Kirkland\nzkirkland514@gmail.com\nAll Rights Reserved";
+        static string version = "FirstUpper Notepad++ Plugin\nVersion 0.04.00\nCopyright Zach Kirkland\nzkirkland514@gmail.com\nAll Rights Reserved";
         internal const string PluginName = "FirstUpper";
         static string iniFilePath = null;
         static bool someSetting = false;
@@ -45,7 +42,8 @@ namespace Kbg.NppPluginNET
             PluginBase.SetCommand(0, "Capitalize Selected Title", CapitalizeTitle, new ShortcutKey(true, true, false, Keys.U));
             PluginBase.SetCommand(1, "Capitalize All Markdown Titles", CapitalizeMDTitles);
             PluginBase.SetCommand(2, "Capitalize First Word of All Sentences", CapSentence);
-            PluginBase.SetCommand(3, "Plugin Info", FirstUpperInfo);
+            PluginBase.SetCommand(3, "CamelCase Last Word Typed", CamelCaseLastWord, new ShortcutKey(false, true, true, Keys.U));
+            PluginBase.SetCommand(4, "Plugin Info", FirstUpperInfo);
         }
 
         internal static void PluginCleanUp()
@@ -63,7 +61,7 @@ namespace Kbg.NppPluginNET
             if (forbidden.Count == 0)
             {
                 // Get the list of forbidden words.
-                GetForbiddenWords();
+                forbidden = GetForbiddenWords(@"plugins\doc\FirstUpper\FirstUpperForbiddenWords.txt");
             }
 
             IntPtr currentScint = PluginBase.GetCurrentScintilla();
@@ -71,7 +69,7 @@ namespace Kbg.NppPluginNET
 
             try
             {
-                // If selected text is not passed in, make sure we get it here.
+                // Get selected text.
                 string selectedText = scintillaGateway.GetSelText();
                 // Convert to lower case in case some words are already
                 // capitalized that should not be capitalized.
@@ -158,11 +156,12 @@ namespace Kbg.NppPluginNET
         /// <summary>
         /// Get the list of "forbidden" words from the text file.
         /// </summary>
-        internal static void GetForbiddenWords()
+        internal static List<string> GetForbiddenWords(string fileString = null)
         {
-            using (StreamReader file = new StreamReader("plugins\\FirstUpperForbiddenWords.txt"))
+            using (StreamReader file = new StreamReader(fileString))
             {
                 string line;
+                List<string> wordList = new List<string>();
 
                 while ((line = file.ReadLine()) != null)
                 {
@@ -171,9 +170,10 @@ namespace Kbg.NppPluginNET
                     // only load words without "*" in front of them.
                     if (line[0] != '*')
                     {
-                        forbidden.Add(line);
+                        wordList.Add(line);
                     }
                 } // end while readline
+                return wordList;
             }
         }
 
@@ -311,42 +311,113 @@ namespace Kbg.NppPluginNET
         /// Turn the last word typed into camel case.
         /// Uses "Directed Acyclic Word Graph" or "DAWG" for short.
         /// </summary>
-        //internal static void camelCaseLastWord()
-        //{
-        //    // Get scintilla gateway.
-        //    IntPtr currentScint = PluginBase.GetCurrentScintilla();
-        //    ScintillaGateway scintillaGateway = new ScintillaGateway(currentScint);
+        internal static void CamelCaseLastWord()
+        {
+            //MessageBox.Show("Camel Case Last Word");
+            Dawg<bool> dawg;
 
-        //    using (FileStream fs = File.Open("FirstUpperDAWG.bin", FileMode.Open, FileAccess.Read))
-        //    {
-        //        var dawg = Dawg<bool>.Load(fs);
-        //        StringBuilder word = new StringBuilder();
+            try
+            {
+                Stream fs = File.Open("./plugins/doc/FirstUpper/FirstUpperDAWG.bin", FileMode.Open, FileAccess.Read);
 
-        //        Position curPos = scintillaGateway.GetCurrentPos();
-        //        char charAtCursor = new char();
+                dawg = Dawg<bool>.Load(fs);
 
-        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) == ' ')
-        //        {
-        //            curPos = new Position(curPos.Value - 1);
-        //        }
+                IntPtr currentScint = PluginBase.GetCurrentScintilla();
+                ScintillaGateway scintillaGateway = new ScintillaGateway(currentScint);
 
-        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) != ' ')
-        //        {
-        //            curPos = new Position(curPos.Value - 1);
-        //        }
+                string word = getLastWord().ToLower();
+                var wordCharArray = word.ToCharArray();
 
-        //        if (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) == ' ')
-        //        {
-        //            curPos = new Position(curPos.Value + 1);
-        //        }
+                var index = 0;
+                var wordCount = 0;
+                string wordSubstr;
 
-        //        while (Convert.ToChar(scintillaGateway.GetCharAt(curPos)) != ' ')
-        //        {
-        //            word.Append(Convert.ToChar(scintillaGateway.GetCharAt(curPos)));
-        //            curPos = new Position(curPos.Value - 1);
-        //        }
-        //    }
-        //}
+                #region "Repeat steps until no more words."
+                // See if the text is a word.
+                // If it is not a word, we remove the last letter
+                // until we find a word. Then we capitalize this word.
+                // We repeat this process for the entire variable.
+                while (true)
+                {
+                    //MessageBox.Show("Index: " + index + "\nWord End: " + (word.Length - 1));
+                    if (index >= word.Length - 1)
+                    {
+                        break;
+                    }
+
+                    // Get the substring word based on the start position.
+                    wordSubstr = word.Substring(index);
+
+                    while (true)
+                    {
+                        // Is the substring word an actual word?
+                        if (dawg[wordSubstr])
+                        {
+                            // Increment the word count.
+                            ++wordCount;
+                            // Do not capitalize the first word of the variable.
+                            if (wordCount > 1)
+                            {
+                                // Capitalize word.
+                                wordCharArray[index] = Convert.ToChar(wordCharArray[index].ToString().ToUpper()); 
+                            }
+
+                            //MessageBox.Show("Word Length: “" + word.Length + "”\nSubstr Length: “" + wordSubstr.Length + "”");
+                            index += wordSubstr.Length;
+                            //MessageBox.Show("Substr After Caps: " + word.Substring(index));
+                            break;
+                        }
+                        else
+                        {
+                            //MessageBox.Show("Substr before removal: “" + wordSubstr + "”\nLength: " + wordSubstr.Length);
+                            if (wordSubstr.Length > 0)
+                            {
+                                wordSubstr = wordSubstr.Remove(wordSubstr.Length - 1);
+                                //MessageBox.Show("Substr after removal: “" + wordSubstr + "”\nLength: " + wordSubstr.Length);
+                            }
+                            else
+                            {
+                                index = word.Length;
+                                break;
+                            }
+                        }
+                    }
+                }
+                #endregion "Repeat steps until no more words."
+
+                // Replace selected word with new word.
+                word = new string(wordCharArray);
+                scintillaGateway.ReplaceSel(word);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Returns a string containing the last word typed.
+        /// </summary>
+        /// <returns>string</returns>
+        internal static string getLastWord()
+        {
+            IntPtr currentScint = PluginBase.GetCurrentScintilla();
+            ScintillaGateway scintillaGateway = new ScintillaGateway(currentScint);
+
+            var selectionStart = scintillaGateway.GetCurrentPos();
+            var selectionEnd = scintillaGateway.GetCurrentPos();
+            var endOfVariable = scintillaGateway.GetCurrentPos();
+
+            scintillaGateway.WordLeft();
+            selectionStart = scintillaGateway.GetCurrentPos();
+            scintillaGateway.WordRight();
+            selectionEnd = scintillaGateway.GetCurrentPos();
+            endOfVariable = selectionEnd;
+
+            scintillaGateway.SetSel(selectionStart, selectionEnd);
+
+            return scintillaGateway.GetSelText();
+        }
 
         /// <summary>
         /// Since we are using .net 2.0, need a "clear" capability for
@@ -359,6 +430,6 @@ namespace Kbg.NppPluginNET
             value.Capacity = 1;
             value.Capacity = 16;
         }
-        #endregion
     }
+    #endregion
 }

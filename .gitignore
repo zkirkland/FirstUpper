@@ -243,3 +243,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/FirstUpper/app.config
+/FirstUpper/Properties/Settings.settings
+/FirstUpper/Properties/Settings.Designer.cs

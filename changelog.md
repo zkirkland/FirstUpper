@@ -1,3 +1,6 @@
+##### Version 0.04.00 -- 06.28.2016
+New Feature "Camel Case Last Word Typed".
+
 ##### Version 0.03.02 -- 06.13.2016
 Bug fix. Add different build.
 * Fix issue #3 where "Capitalize First Word of All Sentences" was removing the last character each time it was called.
