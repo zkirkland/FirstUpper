@@ -1,4 +1,4 @@
-﻿// NPP plugin platform for .Net v0.91.52 by Kasper B. Graversen etc.
+﻿// NPP plugin platform for .Net v0.94.00 by Kasper B. Graversen etc.
 using System;
 using System.Runtime.InteropServices;
 using Kbg.NppPluginNET.PluginInfrastructure;
@@ -50,6 +50,7 @@ namespace Kbg.NppPluginNET
             if (notification.Header.Code == (uint)NppMsg.NPPN_TBMODIFICATION)
             {
                 PluginBase._funcItems.RefreshItems();
+                Main.SetToolBarIcon();
             }
             else if (notification.Header.Code == (uint)NppMsg.NPPN_SHUTDOWN)
             {
